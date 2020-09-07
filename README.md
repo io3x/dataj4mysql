@@ -1,0 +1,2 @@
+# dataj4mysql
+dataj4mysql 是一款通过http接口实现任意数据写入msyql工具，支持自动识别JSON节点，自动建立字段，支持增量更新，提供web控制台增加单一索引，重置字段类型，能够很方便的把json数据同步到mysql
