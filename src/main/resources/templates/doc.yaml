@@ -1,0 +1,127 @@
+# 多行文本模式 使用>或| 标记 |保留换行符
+# 多行详细说明请使用 more: |
+demotest:
+    title: io3x-doc基本使用样例
+    url: /demo/index/demotest
+    more: |
+        说明：
+        视频普通上传为了2个步骤 1.上传视频获取提取码 2.通过提取码获取转码后的视频和缩略图地址
+        步骤1:返回成功标识 识别ret="yes" 记住sn码 通过视频提取接口获取转码后的视频
+        {
+            "ret": "yes",
+            "msg": "ok",
+            "ser": "H-P",
+            "ticket": "0VE7N13EA5SLXI6N",
+            "info": {
+                "sn": "KLBW42UOQOVG55YR"
+            }
+        }
+    b_fds: |
+        access_token||授权码
+        img||图片上传|file
+        more||多行文本|textarea
+        tags[]||标签1
+        tags[]||标签2
+        tags[]||标签3
+    e_fds: |
+        isure||是否确定(11是,10否)
+
+
+syncd_tool_test:
+    title: 2.2.1 测试写入json到msyql数据库
+    url: /syncd/tool/test
+    more: |
+        json必须为二维json 格式:[{},{},{}] {}里面的字段是否一致没有要求
+    b_fds: |
+        table|test|操作表
+        json|[{"data۰user_share_text":"#在抖音，记录美好生活#【抖音广告助手】正在直播，来和我一起支持TA吧。复制下方链接，打开【抖音短视频】，直接观看直播！","data۰vertical_cover_uri":"","data۰vid":"","data۰video_feed_tag":"","data۰wait_copy":"耐心是应付任何情况的巧妙办法","data۰web_count":0,"data۰with_draw_something":false,"data۰with_ktv":false,"data۰with_linkmic":false,"extra۰now":1590405134761,"status_code":0,"aewme_live_data_id":325},{"data۰stream_url۰resolution_name۰SD2":"高清","data۰stream_url۰resolution_name۰SD1":"标清","data۰stream_url۰resolution_name۰HD1":"超清","data۰stream_url۰resolution_name۰ORIGION":"原画","data۰stream_url۰resolution_name۰FULL_HD1":"蓝光"},{"data۰owner۰nickname":"只对你温柔","data۰owner۰allow_show_my_action":false,"data۰owner۰follow_info۰push_status":0,"data۰owner۰follow_info۰following_count":2241,"data۰owner۰follow_info۰follow_status":0}]|JSON字符串|textarea
+    e_fds: |
+        ext||扩展内容|textarea
+
+syncd_tool_json:
+    title: 2.2.2 测试数据同步
+    url: /syncd/tool/json
+    more: |
+    b_fds: |
+        table||操作表
+
+syncd_tool_json2one:
+    title: json转mysql
+    url: /syncd/tool/json2one
+    more: |
+        json必须为{}形式
+    b_fds: |
+        table||操作表
+        json|{}|JSON字符串|textarea
+
+syncd_tool_schmema:
+    title: 2.2.3 获取mysql元数据
+    url: /syncd/tool/schmema
+
+syncd_tool_syncd:
+    title: 2.2.3 同步数据
+    url: /syncd/tool/syncd
+    more: |
+        json必须为二维json
+    b_fds: |
+        table|test2|操作表
+        json|[{"status_code":0,"data۰vertical_cover_uri":"","data۰content_tag":"","data۰with_linkmic":false,"data۰book_end_time":0,"data۰cover۰uri":"webcast/6827759490591476495","data۰cover۰height":0,"data۰cover۰image_type":0,"data۰vid":"","data۰gift_msg_style":2,"data۰wait_copy":"人生如路，要有耐心","data۰comment_box۰placeholder":"说点什么...","data۰owner۰display_id":"126956584","data۰owner۰signature":"白天随缘  晚上19点到凌晨直播\n              承蒙厚爱       感激不尽                                                             \n  \n铭记在心感恩遇见感恩支持感恩陪伴","data۰owner۰nickname":"只对你温柔","data۰distance_city":"20公里外","aewme_live_data_id":321},{"status_code":0,"data۰gift_msg_style":2,"data۰wait_copy":"该来的始终会来，千万别太着急","data۰comment_box۰icon۰height":0,"data۰comment_box۰icon۰image_type":0,"data۰comment_box۰placeholder":"说点什么...","data۰owner۰pay_grade۰grade_describe":"距离24级还差1028抖币","extra۰now":1590404102620,"aewme_live_data_id":323},{"status_code":0,"data۰vertical_cover_uri":"","data۰content_tag":"","data۰with_linkmic":false,"data۰book_end_time":0,"data۰live_type_sandbox":false,"data۰user_share_text":"#在抖音，记录美好生活#【美男子（土牛）】正在直播，来和我一起支持TA吧。复制下方链接，打开【抖音短视频】，直接观看直播！","data۰share_url":"https://www.iesdouyin.com/share/live/6830719510513715972","data۰cell_style":3,"data۰lottery_finish_time":0,"data۰distance":"宜宾","data۰with_ktv":false,"data۰luckymoney_num":0,"data۰title":"开播了 感谢支持","extra۰now":1590404105049,"aewme_live_data_id":324},{"data۰anchor_scheduled_time_text":"","data۰anchor_share_text":"#在抖音，记录美好生活#【抖音广告助手】正在直播，来和我一起支持TA吧。复制下方链接，打开【抖音短视频】，直接观看直播！","data۰use_filter":false,"data۰user_count":292,"data۰user_share_text":"#在抖音，记录美好生活#【抖音广告助手】正在直播，来和我一起支持TA吧。复制下方链接，打开【抖音短视频】，直接观看直播！","data۰vertical_cover_uri":"","data۰vid":"","data۰video_feed_tag":"","data۰wait_copy":"耐心是应付任何情况的巧妙办法","data۰web_count":0,"data۰with_draw_something":false,"data۰with_ktv":false,"data۰with_linkmic":false,"extra۰now":1590405134761,"status_code":0,"aewme_live_data_id":325}]|JSON字符串|textarea
+        sync_key|aewme_live_data_id|索引字段名称
+
+syncd_tool_syncd2:
+    title: 2.2.4 同步数据-无数字增量
+    url: /syncd/tool/syncd2
+    more: |
+        无数字增量
+    b_fds: |
+        table||操作表
+        json|[{}]|JSON字符串|textarea
+        sync_key||索引字段名称
+
+syncd_tool_query:
+    title: 查询数据
+    url: /syncd/tool/query
+    more: |
+        只能执行sql查询
+    b_fds: |
+        password||密码
+        sql||sql语句|textarea
+
+syncd_tool_ddl:
+    title: ddl
+    url: /syncd/tool/ddl
+    more: |
+        可以新建表
+    b_fds: |
+        password||密码
+        sql||sql语句|textarea
+
+
+syncd_tool_syncd3:
+    title: 同步数据-无数字增量-联合字段索引
+    url: /syncd/tool/syncd3
+    more: |
+        无数字增量
+        union_key[]不传值则忽略
+    b_fds: |
+        table|test3|操作表
+        json|[{"ymd":20200912,"cost":100,"username":"testname-100"},{"ymd":20200912,"cost":100,"username":"testname-1000"},{"ymd":20200913,"cost":200,"username":"testname22"},{"ymd":20200914,"cost":300,"username":"testname33"},{"ymd":20200915,"cost":400,"username":"testname44"}]|JSON字符串|textarea
+        new_key|pkey|新增索引字段名称
+        union_key[]|ymd|json包含字段名称1
+        union_key[]|cost|json包含字段名称2
+        union_key[]||json包含字段名称3
+        union_key[]||json包含字段名称4
+        union_key[]||json包含字段名称5
+        union_key[]||json包含字段名称6
+        union_key[]||json包含字段名称7
+        union_key[]||json包含字段名称8
+        union_key[]||json包含字段名称9
+
+# 数据源相关接口
+dataj_demo_ip:
+    title: 3.1.1 demo-第三方IP地址
+    url: http://ip-api.com/json/?lang=zh-CN
+    more: |
+          无
+    b_fds: |
+        ip|1.2.4.6|ip地址

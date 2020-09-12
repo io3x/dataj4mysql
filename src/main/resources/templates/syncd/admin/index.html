@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>自动同步数据库管理</title>
+    <#include "header.html">
+</head>
+<body>
+<div class="nav nav-blue">
+    <a class="nav-item" href="/">返回</a>
+    <a onclick="location.href=location.href;" class="nav-item right" href="javascript:void(0)">刷新</a>
+</div>
+<div style="width: 60%;margin: 20px auto;font-size: 16px;">
+    <h1 style="text-align: left">mysql 字段及索引调整</h1>
+
+    <p style="padding: 5px 0"><h4>修改数据库类型及建立索引</h4></p>
+    <p style="padding: 5px 0"><h4></h4></p>
+    <div class="bg-blue-light pd-1">
+        <div style="line-height: 1.4;overflow-wrap: break-word;word-wrap: break-word;white-space: pre-line;" class="card-box pd-1">1.该页面可以调整字段类型和增删索引
+            <br />2.不支持变更字段(字段由json数据插入时自动维护)</div>
+    </div>
+</div>
+
+<#if dbInfo??>
+<#list dbInfo?keys as table>
+<form enctype="multipart/form-data" action='' name='syncd_${table}' method="post" target='iframesyncd_${table}' id='syncd_${table}'>
+    <input type="hidden" name="table" value="${table}" />
+    <div style="width: 60%;margin: 20px auto;font-size: 16px;">
+        <div class="msg msg-blue">表名: ${table}</div>
+        <table class="table">
+            <#list dbInfo[table]["fields"] as field>
+            <tr>
+                <td>${field}</td>
+                <td>
+                    <div class="form-group mr-1">
+                        ${dbInfo[table]["types"][field]}
+                    </div>
+                </td>
+                <td>
+                    新类型
+                    <div class="form-group mr-1">
+                        <select name="fields[${field}]">
+                            <option value="None">不修改</option>
+                            <#list defaultTypes?keys as type>
+                            <option
+                            <#if type == dbInfo[table]["types"][field]> selected</#if>
+                            value="${type}">${type}</option>
+                            </#list>
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group mr-1">
+                        <#if field == "xxx3id">
+                        <label>索引 <input checked disabled name="indexs[${field}]" type="checkbox" value="1" /></label>
+                        <#else>
+                        <label>索引 <input <#if dbInfo[table]["indexs"]?? && dbInfo[table]["indexs"]?seq_contains(field) > checked</#if> name="indexs[${field}]" type="checkbox" value="1" /></label>
+                    </#if>
+
+                    </div>
+                </td>
+            </tr>
+            </#list>
+            <tr>
+                <td></td>
+                <td>备注:</td>
+                <td><input name="Comment" placeholder='${dbInfo[table]["Comment"]}' type="text" value='${dbInfo[table]["Comment"]}' /></td>
+                <td>
+                    <button class="button button-blue" type="submit">
+                        修改 ${table} 提交
+                    </button>
+                </td>
+            </tr>
+        </table>
+        <div class="msg msg-blue">返回信息 ${table}</div>
+        <div style="padding: 10px 0">
+            <iframe src="" width="100%" height="60" name='iframesyncd_${table}' frameborder="no" border="0" marginwidth="0"
+                    marginheight="0" scrolling="yes" allowtransparency="yes"></iframe>
+            <!--<textarea rows="8">I'm lazy... zzZZzZz...</textarea>-->
+        </div>
+
+    </div>
+</form>
+</#list>
+</#if>
+
+<#include "footer.html">
+</body>
+</html>
