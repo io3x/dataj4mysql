@@ -66,7 +66,7 @@ public class adminController {
         x.put("varchar(128)","alter table `%s` modify column  `%s` varchar(128) NOT NULL DEFAULT '' COMMENT ''");
         x.put("varchar(255)","alter table `%s` modify column  `%s` varchar(255) NOT NULL DEFAULT '' COMMENT ''");
         x.put("varchar(2048)","alter table `%s` modify column  `%s` varchar(2048) NOT NULL DEFAULT '' COMMENT ''");
-        /* x.put("datetime","alter table `%s` modify column  `%s` datetime DEFAULT NULL COMMENT ''"); */
+        x.put("datetime","alter table `%s` modify column  `%s` datetime DEFAULT NULL COMMENT ''");
         x.put("mediumtext","alter table `%s` modify column  `%s` mediumtext COMMENT ''");
         return x;
     }
@@ -102,14 +102,18 @@ public class adminController {
 
                             try {
                                 /*修改字段类型前,先保持历史数据格式一致*/
-                                String nullNum = db.fetch(String.format("select count(*) as num from  %s WHERE `%s` is null",table,field)).get("num").toString();
+                                String nullNum = db.fetch(String.format("select count(*) as num from  %s WHERE `%s` is null or `%s` = '' or  `%s` ='0' ",table,field,field,field)).get("num").toString();
                                 if(Integer.valueOf(nullNum)>0) {
                                     String defaultSqlTmp = defaultTypes.get(info.get(key));
                                     String fixsql;
                                     if(defaultSqlTmp.contains("DEFAULT ''")) {
                                         fixsql = String.format("update %s set `%s`='' where xxx3id in (select xxx3id from (select xxx3id from %s WHERE `%s` is null) a)",table,field,table,field);
-                                    } else {
+                                    } else if(defaultSqlTmp.contains("DEFAULT '0")) {
                                         fixsql = String.format("update %s set `%s`=0 where xxx3id in (select xxx3id from (select xxx3id from %s WHERE `%s` is null) a)",table,field,table,field);
+                                    } else if(defaultSqlTmp.contains("datetime DEFAULT NULL")) {
+                                        fixsql = String.format("delete from `%s` where xxx3id in (select xxx3id from (select xxx3id from %s WHERE `%s` = '0' or `%s` = '' ) a)",table,table,field,field);
+                                    } else {
+                                        fixsql = " ";
                                     }
                                     Db.update(fixsql);
                                 }
@@ -123,6 +127,8 @@ public class adminController {
                         }
                     }
                 });
+                /*修改完字段类型后,重置系统记录的数据表类型*/
+                db.setScheme();
             } catch (Exception e) {
                 rInfo.put("e1",e.getMessage());
             }

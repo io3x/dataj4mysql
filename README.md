@@ -249,3 +249,10 @@ demotest:
 - springboot及相关套件
 - jfinal mysql操作模型 com.liucf.db.record
 - Kimochi.css 接口文档UI
+
+
+## 更新说明
+
+### 1.1.12 通过web管理界面 http://localhost:13306/syncd/admin/index 支持把默认text修改为 datetime类型
+- 修改前,如果之前是0填充的数据,整行数据会被删除
+- 写入数据必须符合 2020-01-01 00:00:00 形式格式,否则不能录入数据库

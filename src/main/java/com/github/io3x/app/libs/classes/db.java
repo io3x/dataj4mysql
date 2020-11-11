@@ -78,6 +78,7 @@ public class db {
      * Schmema
      */
     public static Map<String,List<String>> schmema=null;
+    public static Map<String,Map<String,String>> schmemaTableFieldType=null;
 
     /**
      * Addfield * 更快速的操作对象增加值
@@ -91,6 +92,11 @@ public class db {
                 schmema.put(table,new ArrayList<>());
             }
             schmema.get(table).add(field);
+
+            if(!schmemaTableFieldType.containsKey(table)) {
+                schmemaTableFieldType.put(table,new HashMap<>());
+            }
+            schmemaTableFieldType.get(table).put(field,"text");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -102,9 +108,17 @@ public class db {
     synchronized public static void setScheme(){
         List<String> tables = Db.query("show tables");
         Map<String,List<Map>> info = new HashMap<>();
+        Map<String,Map<String,String>> infoFieldTypes = new HashMap<>();
         tables.forEach(table->{
             List<Map> tmp = fetch_all(String.format("show full columns from %s",table));
             info.put(table,tmp);
+            /*记录表字段类型 开始*/
+            Map<String,String> FieldTypes = new HashMap<>();
+            tmp.forEach(map->{
+                FieldTypes.put(String.valueOf(map.get("Field")),String.valueOf(map.get("Type")));
+            });
+            infoFieldTypes.put(table,FieldTypes);
+            /*记录表字段类型 结束*/
         });
         Map<String,List<String>> r = new HashMap<>();
         info.forEach((k,v)->{
@@ -114,6 +128,7 @@ public class db {
             });
             r.put(k,x);
         });
+        schmemaTableFieldType = infoFieldTypes;
         schmema = r;
     }
 
@@ -320,17 +335,38 @@ public class db {
                 List<Object> oblist = new LinkedList<>();
                 /*根据arrJsonKeys索引增加数据*/
                 arrJsonKeys.forEach(k->{
+                    /*判断已存在的字段类型*/
+                    String fieldType;
+                    try {
+                        fieldType = db.schmemaTableFieldType.get(table).get(k);
+                    } catch (Exception e) {
+                        fieldType = "";
+                    }
+
                     if(map.containsKey(k)) {
                         String tmp = String.valueOf(map.get(k));
-                        if(tmp.matches("[0-9\\.-]+")) {
-                            oblist.add(map.get(k));
-                        } else if(tmp.equals("null")){
-                            oblist.add("0");
+                        /*有值且是时间日期类型,判断是否匹配*/
+                        if(fieldType.equals("datetime")) {
+                            if(tmp.matches("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}[0-9\\.]{0,}")){
+                                oblist.add(tmp);
+                            } else {
+                                oblist.add(null);
+                            }
                         } else {
-                            oblist.add(tmp);
+                            if(tmp.matches("[0-9\\.-]+")){
+                                oblist.add(map.get(k));
+                            } else if(tmp.equals("null")){
+                                oblist.add("0");
+                            } else {
+                                oblist.add(tmp);
+                            }
                         }
                     } else {
-                        oblist.add("0");
+                        if(fieldType.equals("datetime")) {
+                            oblist.add(null);
+                        } else {
+                            oblist.add("0");
+                        }
                     }
                 });
                 data.add(oblist);
