@@ -96,6 +96,15 @@ syncd_tool_ddl:
         password||密码
         sql||sql语句|textarea
 
+syncd_tool_struct:
+    title: 同步表结构字段
+    url: /syncd/tool/struct
+    more: |
+        同步表结构字段:不存在原表字段则新建,存在则删除
+    b_fds: |
+        table||原表名称
+        table_to||目标表名称
+        iscopy|0|复制数据(0:不复制 1:复制)
 
 syncd_tool_syncd3:
     title: 同步数据-无数字增量-联合字段索引

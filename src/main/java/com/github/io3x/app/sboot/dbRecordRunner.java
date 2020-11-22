@@ -16,8 +16,10 @@ public class dbRecordRunner implements ApplicationRunner {
     Environment environment;
     private static final Logger LOG = LoggerFactory.getLogger(dbRecordRunner.class);
 
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        myLoader.env = environment;
         /*启动mysql*/
         Db.init(environment.getProperty("mydb.url"),environment.getProperty("mydb.username"), environment.getProperty("mydb.password"));
         db.setScheme();

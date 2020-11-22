@@ -85,8 +85,8 @@ public class toolController {
 
     @RequestMapping(value = "/schmema",method = {RequestMethod.GET,RequestMethod.POST})
     public R schmema(HttpServletRequest request) {
-        db.setScheme();
-        return R.ok().put(db.schmema);
+        //db.setScheme();
+        return R.ok().put("schmema",db.schmema).put("FieldType",db.schmemaTableFieldType);
     }
 
     @RequestMapping(value = "/syncd",method = {RequestMethod.GET,RequestMethod.POST})
@@ -187,6 +187,36 @@ public class toolController {
             return R.error(-1,"参数错误");
         }
         return R.ok().put(ticket).put("r",r);
+    }
+
+
+
+    @RequestMapping(value = "/struct",method = {RequestMethod.GET,RequestMethod.POST})
+    public R sync_struct(HttpServletRequest request){
+        String ticket = func.randStr(16);
+        Map<String, Object> data = RequestParamsToMap.getParameterMap(request);
+        String table = String.valueOf(data.get("table"));
+        String table_to = String.valueOf(data.get("table_to"));
+        String iscopy = String.valueOf(data.get("iscopy"));
+        if(!StrUtils.areNotEmpty(table,table_to)) {
+            return R.error(-1,"参数错误");
+        }
+
+        if(!db.schmema.containsKey(table)) {
+            return R.error(-1,"来源表不存在");
+        }
+
+        db.setScheme();
+
+        if(iscopy.equals("1")) {
+            db.copyTable(table,table_to,true);
+        } else {
+            db.copyTable(table,table_to,false);
+        }
+
+
+
+        return R.ok().put(ticket).put(table,db.schmema.get(table)).put(table_to,db.schmema.get(table_to));
     }
 
 

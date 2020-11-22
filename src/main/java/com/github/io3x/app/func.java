@@ -119,6 +119,14 @@ public class func {
         }
     }
 
+    public static void sleep_ms(int sec){
+        try {
+            Thread.sleep(sec);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void println(Object... ss){
         StringBuffer sb = new StringBuffer();
         for(Object i:ss) {

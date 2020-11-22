@@ -1,11 +1,13 @@
 package com.github.io3x.app.libs.lock;
 
 import com.github.io3x.app.func;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 public class internLock {
+    private static Logger logger = LoggerFactory.getLogger(internLock.class);
 
     public static void lockWait(Runnable r,String... strs){
         StringBuffer sb = new StringBuffer();
@@ -42,6 +44,8 @@ public class internLock {
             if(mapA.containsKey(strKey)) {
                 mapA.remove(strKey);
             }
+        } else {
+            logger.info("{} 已锁定,忽略该执行过程",strKey);
         }
     }
 

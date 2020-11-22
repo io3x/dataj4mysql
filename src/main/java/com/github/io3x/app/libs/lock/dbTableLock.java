@@ -75,10 +75,12 @@ public class dbTableLock {
             try {
                 //logger.info("TableLock await 准备 {}",a);
                 lock.lock();
-                //logger.info("TableLock await 苏醒  {}",a);
+                logger.info("TableLock await 苏醒  {}",a);
             } finally {
                 lock.unlock();
             }
+        } else {
+            //logger.info("TableLock await 解除  {}",a);
         }
 
     }

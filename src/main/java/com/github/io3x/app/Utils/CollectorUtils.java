@@ -50,6 +50,14 @@ public class CollectorUtils {
         return r;
     }
 
+    public static Map<String,Map>  listMap2keyListMap(List<Map> listMap,String from){
+        Map<String,Map> r = new TreeMap<>();
+        listMap.forEach(map->{
+            r.put(String.valueOf(map.get(from)),map);
+        });
+        return r;
+    }
+
     /**
      * List map addnewkey list listMap增加key
      *

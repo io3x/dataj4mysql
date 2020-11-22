@@ -3,6 +3,8 @@ package com.github.io3x.app.libs.classes;
 import com.github.io3x.app.Utils.CollectorUtils;
 import com.github.io3x.app.func;
 import com.github.io3x.app.libs.lock.dbTableLock;
+import com.github.io3x.app.sboot.myLoader;
+import com.github.io3x.syncd.adminController;
 import com.liucf.dbrecord.Db;
 import com.liucf.dbrecord.Record;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -141,6 +143,12 @@ public class db {
      * Sync metadata.
      */
     synchronized public static void syncMetadata(){
+        String engine;
+        try {
+            engine = myLoader.env.getProperty("dataj4json.table_engine");
+        } catch (Exception e) {
+            engine = "ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        }
         if(!schmema.containsKey("metadata")) {
             try {
                 Db.update("CREATE TABLE `metadata` (\n" +
@@ -148,7 +156,7 @@ public class db {
                         "  `sync_key` varchar(255) NOT NULL DEFAULT '',\n" +
                         "  `sync_value` bigint(11) NOT NULL DEFAULT '0',\n" +
                         "  `synd_datetime` datetime DEFAULT NULL\n" +
-                        ") ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='增量数据标记表'\n" +
+                        ") "+engine+" COMMENT='增量数据标记表'\n" +
                         "\n");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -169,7 +177,7 @@ public class db {
      * @param table the table
      */
     public static void syncMetadata(String table){
-        String obj = new StringBuffer().append("com.github.niefy.app.libs.classes.db#syncMetadata").append(table).toString();
+        String obj = new StringBuffer().append("#syncMetadata").append(table).toString();
         synchronized (obj.intern()) {
             if(metadata!=null&&metadata.size()>0&&metadata.containsKey(table)) {
                 int sync_value = metadata.get(table);
@@ -192,6 +200,58 @@ public class db {
                 metadata.put(table,sync_value);
             }
         }
+    }
+
+    public static void copyTable(String table,String table_to,boolean isCopyData){
+        /*如果目标表不存在,则新建表*/
+        if(!db.schmema.containsKey(table_to)) {
+            db.initTable(table_to);
+            /*修复索引类型*/
+            try {
+                if(db.schmemaTableFieldType.get(table_to).get("xxx3id").equals("bigint(11)")) {
+
+                } else {
+                    Db.use().update(String.format("alter table %s modify xxx3id bigint(11)",table_to));
+                    Db.use().update(String.format("alter table %s drop primary key",table_to));
+                    Db.use().update(String.format("ALTER TABLE %s ADD INDEX nk_xxx3id(`xxx3id`)",table_to));
+                }
+            } catch (Exception e) {
+
+            }
+        }
+
+        dbTableLock.lock(()->{
+            /*处理表字段 开始*/
+            Map<String,String> defaultTypes = adminController.defaultTypes();
+            db.schmema.get(table).forEach(field->{
+                /*存在字段*/
+                if(db.schmema.get(table_to).contains(field)) {
+
+                } else {
+                    String fk = db.schmemaTableFieldType.get(table).get(field);
+                    if(defaultTypes.containsKey(fk)) {
+                        String atSql = defaultTypes.get(fk).replace("modify column","add column");
+                        Db.use().update(String.format(atSql,table_to,field));
+                    } else {
+                        Db.use().update(String.format("ALTER TABLE %s ADD  `%s` text COMMENT ''",table_to,field));
+                    }
+                }
+            });
+            db.setScheme();
+            /*删除多余的字段*/
+            db.schmema.get(table_to).forEach(field->{
+                if(!db.schmema.get(table).contains(field)) {
+                    Db.use().update(String.format("ALTER TABLE `%s` drop COLUMN `%s`",table_to,field));
+                }
+            });
+            db.setScheme();
+            /*处理表字段 结束*/
+
+            /*复制数据*/
+            if(isCopyData) {
+                Db.use().update(String.format("insert into %s select * from %s where xxx3id not in (select xxx3id from %s)",table_to,table,table_to));
+            }
+        },table_to);
     }
 
     /**
@@ -275,10 +335,16 @@ public class db {
      * @param table table
      */
     public static void initTable(String table){
-        String obj = new StringBuffer().append("com.github.niefy.app.libs.classes.db.initTable").append(table).toString();
+        String engine;
+        try {
+            engine = myLoader.env.getProperty("dataj4json.table_engine");
+        } catch (Exception e) {
+            engine = "ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        }
+        String obj = new StringBuffer().append("app.libs.classes.db.initTable").append(table).toString();
         synchronized (obj.intern()){
             if(!schmema.containsKey(table)) {
-                Db.update(String.format("CREATE TABLE `%s` ( `xxx3id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键', PRIMARY KEY (`xxx3id`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4",table));
+                Db.use().update(String.format("CREATE TABLE `%s` ( `xxx3id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键', PRIMARY KEY (`xxx3id`) ) %s",table,engine));
                 addfield(table,"xxx3id");
             }
         }
@@ -491,8 +557,8 @@ public class db {
      */
     public static void json2one(String table,String json){
         initTable(table);
-        /*写入表数据时判断是否锁定,最多等待10分钟*/
-        dbTableLock.await(table,600);
+        /*写入表数据时判断是否锁定,最多等待10分钟
+        dbTableLock.await(table,600);*/
         Map<String, Object> arrJson = func.json_decode(json);
         if (arrJson!=null&&arrJson.size()>0) {
             arrJson.forEach((k,v)->{
@@ -529,5 +595,26 @@ public class db {
         String sql = String.format("update %s set %s where %s",table,sets,where);
         LoggerFactory.getLogger(db.class).info(sql);
         return Db.update(sql);
+    }
+
+    /**
+     * Uniq sql string
+     * 生成去重sql语句及执行操作
+     *
+     * @param table           table
+     * @param numberFieldName number field name
+     * @param ww              ww
+     * @return the string
+     */
+    public static String uniqSql(boolean isDelete,String table,String numberFieldName,String ...ww){
+        List<String> wwArr=(List<String>)Arrays.asList(ww);
+        String groupbySql = String.join(",",wwArr);
+        String sql = " select m.xxx3id from %s m, ( select a.max_fee,substring_index(substring_index(a.ids,',',b.help_topic_id+1),',',-1) as id from  (select max(%s) as max_fee,count(DISTINCT %s) as num,GROUP_CONCAT(xxx3id) as ids from %s  GROUP BY %s HAVING num>1) a join mysql.help_topic b on b.help_topic_id < (length(a.ids) - length(replace(a.ids,',',''))+1) ) n WHERE m.xxx3id=n.id and m.%s < n.max_fee ";
+        String deSql = String.format(sql,table,numberFieldName,numberFieldName,table,groupbySql,numberFieldName);
+        if(isDelete) {
+            int delCount = Db.use().update(String.format("delete from %s WHERE xxx3id in ( select xxx3id from (%s) zzz )",table,deSql));
+            return String.valueOf(delCount);
+        }
+        return deSql;
     }
 }

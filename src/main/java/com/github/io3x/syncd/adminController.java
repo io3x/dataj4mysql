@@ -5,6 +5,7 @@ import com.github.io3x.app.Utils.RequestParamsToMap;
 import com.github.io3x.app.Utils.StrUtils;
 import com.github.io3x.app.func;
 import com.github.io3x.app.libs.classes.db;
+import com.github.io3x.app.libs.lock.dbTableLock;
 import com.github.io3x.syncd.classes.asyncHandleEvent;
 import com.liucf.dbrecord.Db;
 import org.slf4j.Logger;
@@ -55,13 +56,14 @@ public class adminController {
         return mapInfo;
     }
 
-    private static Map<String,String> defaultTypes(){
+    public static Map<String,String> defaultTypes(){
         Map<String,String> x =  new LinkedHashMap<>();
         x.put("tinyint(4)","alter table `%s` modify column `%s` tinyint(4) NOT NULL DEFAULT '0' COMMENT ''");
         x.put("int(10)","alter table `%s` modify column  `%s` int(10) NOT NULL DEFAULT '0' COMMENT ''");
         x.put("bigint(11)","alter table `%s` modify column  `%s` bigint(11) NOT NULL DEFAULT '0' COMMENT ''");
         x.put("decimal(10,2)","alter table `%s` modify column  `%s` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT ''");
         x.put("decimal(10,4)","alter table `%s` modify column  `%s` decimal(10,4) NOT NULL DEFAULT '0.0000' COMMENT ''");
+        x.put("decimal(16,4)","alter table `%s` modify column  `%s` decimal(16,4) NOT NULL DEFAULT '0.0000' COMMENT ''");
         x.put("varchar(36)","alter table `%s` modify column  `%s` varchar(36) NOT NULL DEFAULT '' COMMENT ''");
         x.put("varchar(128)","alter table `%s` modify column  `%s` varchar(128) NOT NULL DEFAULT '' COMMENT ''");
         x.put("varchar(255)","alter table `%s` modify column  `%s` varchar(255) NOT NULL DEFAULT '' COMMENT ''");
@@ -115,7 +117,9 @@ public class adminController {
                                     } else {
                                         fixsql = " ";
                                     }
-                                    Db.update(fixsql);
+                                    dbTableLock.lock(()->{
+                                        Db.update(fixsql);
+                                    },table);
                                 }
                                 /*执行修改字段类型*/
                                 String updateSql = String.format(defaultTypes.get(info.get(key)),table,field);
